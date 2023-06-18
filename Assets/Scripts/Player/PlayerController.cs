@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,10 +9,19 @@ public class PlayerController : MonoBehaviour
     private CharacterController characterController;
     private Animator characterAnimator;
     private Vector3 direction;
-    private bool isWalking;
 
     [Header("Configurações do jogador")]
     public float movementSpeed = 3f;
+    private bool isWalking;
+
+    [Header("Configurações de ataque")]
+    public ParticleSystem fxAttack;
+    public Transform hitBox;
+    [Range(0.2f, 1f)]
+    public float hitRanger = 0.5f;
+    private bool isAttacking;
+    public LayerMask hitMask;
+    public int hitDamage = 5;
 
     void Start()
     {
@@ -55,10 +65,40 @@ public class PlayerController : MonoBehaviour
     {
         characterAnimator.SetBool("isWalking", isWalking);
 
-        if (Input.GetButtonDown("Fire1"))
+        Attack();
+    }
+
+    void Attack()
+    {
+        if (Input.GetButtonDown("Fire1") && !isAttacking)
         {
+            isAttacking = true;
             characterAnimator.SetTrigger("Attack");
+            fxAttack.Emit(1);
+
+            Collider[] hitInfo = Physics.OverlapSphere(hitBox.position, hitRanger, hitMask);
+
+            foreach(Collider col in hitInfo)
+            {
+                col.gameObject.SendMessage("Hit", hitDamage, SendMessageOptions.DontRequireReceiver);
+            }
+
         }
+    }
+
+    private void AttackIsDone()
+    {
+        isAttacking = false;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (hitBox != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(hitBox.position, hitRanger);
+        }
+       
     }
 
 }
