@@ -4,8 +4,17 @@ using UnityEngine;
 
 public class Grass : MonoBehaviour
 {
+    public ParticleSystem particle;
+    private bool isCut;
+
     void Hit(int damage)
     {
-        transform.localScale = new Vector3(1f, 1f, 1f);
+        if (!isCut)
+        {
+            isCut = true;
+            transform.localScale = new Vector3(1f, 1f, 1f);
+            particle.Emit(10);
+        }
+       
     }
 }
